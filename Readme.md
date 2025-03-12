@@ -8,25 +8,11 @@ uvicorn app.main:app --reload
 | 2 | 0.2 | 数据库设计与建模|
 | 3 | 3 | 后端数据接口开发测试|
 | 4 | 1.6 | 前端调试|
+| 5 | 1 | 后续文档sql脚本及调试方法整理|
 
-### 用户管理
+未完成内容：AI返回用户回复内容
 
-- `GET /users/me` - 获取当前用户信息
-- `GET /users/` - 获取所有用户
-- `GET /users/{user_id}` - 获取特定用户
-- `PUT /users/{user_id}` - 更新用户信息
-- `DELETE /users/{user_id}` - 删除用户
-
-### 用户虚拟货币 (Coins)
-
-系统使用整数类型的 coins 作为虚拟货币单位，不支持小数点。这样设计的好处是：
-
-1. 避免浮点数计算中的精度问题
-2. 更适合表示不可分割的虚拟货币单位
-3. 提高数据库性能
-
-例如，如果您的应用中 1 个真实货币等于 100 coins，那么 10.5 元将表示为 1050 coins。
-
-- `PUT /users/{user_id}/coins` - 设置用户 coins 余额
-- `POST /users/{user_id}/coins/add` - 向用户账户添加 coins
-- `POST /users/{user_id}/coins/deduct` - 从用户账户扣除 coins
+局域网调试方法
+1、将basic.sql在本地数据库执行
+2、本地开启服务
+3、修改安卓应用服务地址则可以登录，查看已完成内容

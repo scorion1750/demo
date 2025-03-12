@@ -98,6 +98,7 @@ VALUES
     ('user2', 'user2@example.com', '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', TRUE, 5000),
     ('inactive_user', 'inactive@example.com', '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', FALSE, 0),
     ('test_user', 'test@example.com', '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', TRUE, 2500);
+    ('test_user6', 'test@example.com', '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', TRUE, 2500);
 
 -- 插入测试任务数据
 -- 使用当前日期和未来日期
@@ -156,7 +157,7 @@ CREATE TABLE IF NOT EXISTS stories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description TEXT,
-    story_type ENUM('adventure', 'mystery', 'romance', 'scifi', 'fantasy', 'horror') DEFAULT 'adventure',
+    story_type ENUM('ADVENTURE', 'MYSTERY', 'ROMANCE', 'SCIFI', 'FANTASY', 'HORROR') DEFAULT 'ADVENTURE',
     unlock_cost BIGINT NOT NULL DEFAULT 5000,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -214,30 +215,50 @@ CREATE TABLE IF NOT EXISTS user_story_responses (
     FOREIGN KEY (choice_id) REFERENCES story_choices(id) ON DELETE SET NULL
 );
 
--- 插入示例故事数据
-INSERT INTO stories (title, description, story_type, unlock_cost, is_active) VALUES
-('神秘森林冒险', '探索一片神秘的森林，发现隐藏的秘密和宝藏。', 'adventure', 3000, TRUE),
-('古堡谜案', '解开古老城堡中的谜团，找出真相。', 'mystery', 5000, TRUE),
-('星际旅程', '踏上星际旅行，探索未知的星球和文明。', 'scifi', 8000, TRUE);
+INSERT INTO user_management.stories (id, title, description, story_type, unlock_cost, is_active, created_at, updated_at) VALUES (1, '冒险之旅', '一个充满奇幻冒险的故事，你将扮演一位勇敢的探险家，探索未知的世界。', 'ADVENTURE', 50, 1, '2025-03-12 15:02:46', null);
+INSERT INTO user_management.stories (id, title, description, story_type, unlock_cost, is_active, created_at, updated_at) VALUES (2, '神秘岛屿', '探索一个神秘的岛屿，揭开它的秘密。岛上有许多奇怪的现象和生物，等待你去发现。', 'MYSTERY', 100, 1, '2025-03-12 15:02:46', null);
+INSERT INTO user_management.stories (id, title, description, story_type, unlock_cost, is_active, created_at, updated_at) VALUES (3, '城市传说', '都市中流传的神秘故事，真相往往比传说更加离奇。你将调查一系列超自然现象。', 'ROMANCE', 75, 1, '2025-03-12 15:02:46', null);
+INSERT INTO user_management.stories (id, title, description, story_type, unlock_cost, is_active, created_at, updated_at) VALUES (4, '星际旅行', '在未来的宇宙中航行，探索外星文明和新的星球。你的选择将决定人类的命运。', 'SCIFI', 120, 1, '2025-03-12 15:02:46', null);
+INSERT INTO user_management.stories (id, title, description, story_type, unlock_cost, is_active, created_at, updated_at) VALUES (5, '古代遗迹', '探索古代文明留下的遗迹，解开历史之谜。小心陷阱和诅咒！', 'ADVENTURE', 80, 1, '2025-03-12 15:02:46', null);
 
--- 插入示例章节数据（仅为第一个故事）
-INSERT INTO story_chapters (story_id, title, content, order_num) VALUES
-(1, '进入森林', '你站在一片神秘森林的边缘。茂密的树木在你面前延伸，阳光透过树叶形成斑驳的光影。你听到远处传来鸟鸣和流水的声音。你决定...', 1),
-(1, '小径探索', '你沿着一条蜿蜒的小径前进。四周的植被越来越茂密，空气中弥漫着泥土和植物的芬芳。突然，你看到前方的路分叉了。', 2),
-(1, '神秘湖泊', '你来到一个平静的湖泊边。湖水清澈见底，倒映着蓝天和周围的树木。湖中央有一个小岛，岛上似乎有什么在闪闪发光。', 3),
-(1, '古老遗迹', '你发现了一处古老的石头建筑，被藤蔓和苔藓覆盖。入口处刻着奇怪的符号，似乎是某种远古文明的遗迹。', 4),
-(1, '宝藏发现', '经过一番探索，你终于找到了传说中的森林宝藏！这是一个装满古老金币和宝石的箱子，旁边还有一本记载着森林历史的古书。', 5);
 
--- 插入示例选择数据
-INSERT INTO story_choices (chapter_id, text, next_chapter_id) VALUES
-(1, '沿着明显的小径前进', 2),
-(1, '向森林深处探索', 4),
-(2, '选择左边的路', 3),
-(2, '选择右边的路', 4),
-(3, '尝试游到小岛', 5),
-(3, '继续沿着湖边行走', 4),
-(4, '进入遗迹探索', 5),
-(4, '返回森林寻找其他路径', 2);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (1, 1, '出发', '你站在一个小村庄的边缘，准备开始你的冒险之旅。你的背包里有一些基本的补给和一把小刀。前方有两条路：一条通向茂密的森林，另一条通向开阔的草原。', 1, '2025-03-12 15:02:46', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (2, 1, '森林之路', '你选择了森林之路。树木高大，阳光几乎无法穿透茂密的树冠。你听到远处有水流的声音，同时也注意到一些奇怪的足迹。', 2, '2025-03-12 15:02:46', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (3, 1, '草原之路', '你选择了草原之路。开阔的视野让你能看到远处的山脉。草原上有一些野生动物，还有一个看起来像是营地的地方。', 3, '2025-03-12 15:02:46', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (4, 1, '神秘洞穴', '你跟随足迹来到一个神秘的洞穴入口。洞穴黑暗而潮湿，但似乎有微弱的光从深处传来。', 4, '2025-03-12 15:02:46', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (5, 1, '山顶', '经过艰难的攀爬，你到达了山顶。从这里可以俯瞰整个地区，你看到远处有一座古老的城堡。', 5, '2025-03-12 15:02:46', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (6, 2, '海难', '你在一场突如其来的风暴中幸存下来，被冲到一个神秘的岛屿上。你的船只已经损毁，只有少量物资幸存。岛上看起来郁郁葱葱，但异常安静。', 1, '2025-03-12 15:02:52', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (7, 2, '海滩', '你决定沿着海滩走，希望找到其他幸存者或者救援信号。你发现一些奇怪的足迹和一个半掩在沙中的箱子。', 2, '2025-03-12 15:02:52', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (8, 2, '丛林', '你进入岛屿的丛林。植被非常茂密，有些植物你从未见过。你听到远处有奇怪的声音。', 3, '2025-03-12 15:02:52', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (9, 2, '古老神庙', '你发现了一座古老的神庙，掩埋在丛林之中。神庙的墙壁上刻满了奇怪的符号和图案。', 4, '2025-03-12 15:02:52', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (10, 2, '地下通道', '神庙内有一个通往地下的通道。通道黑暗而潮湿，但你决定探索它。', 5, '2025-03-12 15:02:52', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (11, 3, '神秘电话', '你收到一个陌生号码的电话，对方声称知道关于城市中一系列怪异事件的真相。你决定调查这个电话的来源。', 1, '2025-03-12 15:02:52', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (12, 3, '废弃医院', '线索指向一家废弃的医院。据说这里曾经发生过一些不为人知的实验。', 2, '2025-03-12 15:02:52', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (13, 3, '地下室', '你在医院找到了通往地下室的入口。地下室黑暗而潮湿，墙上涂满了奇怪的符号。', 3, '2025-03-12 15:02:52', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (14, 3, '秘密档案', '你发现了一些秘密档案，记录了医院进行的实验。这些实验似乎与超自然现象有关。', 4, '2025-03-12 15:02:52', null);
+INSERT INTO user_management.story_chapters (id, story_id, title, content, order_num, created_at, updated_at) VALUES (15, 3, '最终真相', '你终于了解到了城市传说背后的真相，但这个真相比传说本身更加可怕。', 5, '2025-03-12 15:02:52', null);
 
--- 修改 story_chapters 表中的 order 列名为 order_num
-ALTER TABLE story_chapters CHANGE COLUMN `order` order_num INT DEFAULT 0;
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (1, 1, '选择森林之路', 2, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (2, 1, '选择草原之路', 3, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (3, 2, '跟随足迹', 4, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (4, 2, '寻找水源', null, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (5, 3, '前往营地', null, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (6, 3, '爬上山峰', 5, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (7, 6, '沿着海滩走', 7, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (8, 6, '进入丛林', 8, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (9, 7, '检查箱子', null, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (10, 7, '继续沿海滩走', null, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (11, 8, '调查声音来源', null, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (12, 8, '寻找神庙', 9, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (13, 9, '研究墙上的符号', null, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (14, 9, '探索地下通道', 10, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (15, 11, '追踪电话号码', null, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (16, 11, '前往废弃医院', 12, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (17, 12, '探索医院主楼', null, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (18, 12, '寻找地下室入口', 13, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (19, 13, '调查墙上的符号', null, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (20, 13, '寻找秘密档案', 14, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (21, 14, '销毁档案', null, '2025-03-12 15:02:59');
+INSERT INTO user_management.story_choices (id, chapter_id, text, next_chapter_id, created_at) VALUES (22, 14, '继续调查真相', 15, '2025-03-12 15:02:59');
+
+
