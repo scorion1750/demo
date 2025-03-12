@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, validator
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Any
 from datetime import datetime
 from enum import Enum
 
@@ -136,14 +136,19 @@ class UserStoryInDB(UserStoryBase):
     class Config:
         from_attributes = True
 
-class UserStory(UserStoryInDB):
-    responses: List[UserStoryResponse] = []
-    story: Optional[Story] = None
-    current_chapter: Optional[StoryChapter] = None
+class UserStory(BaseModel):
+    id: int
+    user_id: int
+    story_id: int
+    current_chapter_id: Optional[int] = None
+    is_completed: bool = False
+    unlocked_at: Optional[datetime] = None
+    last_interaction: Optional[datetime] = None
+    responses: List[Any] = []
+    story: Optional[Any] = None
+    current_chapter: Optional[Any] = None
 
     class Config:
         from_attributes = True
-        # 允许额外字段
-        extra = "allow"
-        # 允许部分初始化
-        validate_assignment = False 
+        arbitrary_types_allowed = True
+        extra = "allow" 

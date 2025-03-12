@@ -12,7 +12,8 @@ from app.utils.security import (
     authenticate_user, 
     create_access_token, 
     get_current_active_user,
-    ACCESS_TOKEN_EXPIRE_MINUTES
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    logout_user
 )
 from app.schemas.response import ResponseModel
 
@@ -208,4 +209,13 @@ def update_current_user(
     db.commit()
     db.refresh(current_user)
     
-    return ResponseModel(data=current_user) 
+    return ResponseModel(data=current_user)
+
+@router.post("/logout", response_model=ResponseModel)
+def logout(current_user = Depends(get_current_active_user)):
+    """用户登出"""
+    success = logout_user(current_user.username)
+    if success:
+        return ResponseModel(data=None, msg="Successfully logged out")
+    else:
+        return ResponseModel(data=None, msg="No active session found") 

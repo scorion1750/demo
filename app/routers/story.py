@@ -304,7 +304,7 @@ def unlock_story(
     
     return ResponseModel(data=user_story)
 
-@router.get("/my", response_model=ResponseModel[List[Dict[str, Any]]])
+@router.get("/my")
 def read_my_stories(
     skip: int = 0, 
     limit: int = 100, 
@@ -312,64 +312,24 @@ def read_my_stories(
     current_user = Depends(get_current_active_user)
 ):
     """获取用户解锁的所有故事"""
-    print('current_user===', current_user)
+    print(f'获取用户 {current_user.username} 的所有解锁故事')
 
-    # 使用 join 加载关联数据，避免 None 值问题
+    # 简单查询，不使用 joinedload
     user_stories = db.query(UserStory).filter(
         UserStory.user_id == current_user.id
-    ).options(
-        joinedload(UserStory.story),
-        joinedload(UserStory.current_chapter)
     ).offset(skip).limit(limit).all()
-
-    print('user_stories===', user_stories)
     
-    # 手动构建响应，避免 None 值问题
-    result = []
-    for user_story in user_stories:
-        story_dict = {
-            "id": user_story.id,
-            "user_id": user_story.user_id,
-            "story_id": user_story.story_id,
-            "current_chapter_id": user_story.current_chapter_id,
-            "is_completed": user_story.is_completed,
-            "unlocked_at": user_story.unlocked_at,
-            "last_interaction": user_story.last_interaction,
-            "responses": [],  # 如果需要，可以添加响应数据
-            "story": None,
-            "current_chapter": None
-        }
-        
-        # 添加故事数据（如果存在）
-        if user_story.story:
-            story_dict["story"] = {
-                "id": user_story.story.id,
-                "title": user_story.story.title,
-                "description": user_story.story.description,
-                "story_type": user_story.story.story_type,
-                "unlock_cost": user_story.story.unlock_cost,
-                "is_active": user_story.story.is_active,
-                "created_at": user_story.story.created_at,
-                "updated_at": user_story.story.updated_at,
-                "chapters": []  # 添加空的章节列表以匹配模型
-            }
-        
-        # 添加当前章节数据（如果存在）
-        if user_story.current_chapter:
-            story_dict["current_chapter"] = {
-                "id": user_story.current_chapter.id,
-                "story_id": user_story.current_chapter.story_id,
-                "title": user_story.current_chapter.title,
-                "content": user_story.current_chapter.content,
-                "order_num": user_story.current_chapter.order_num,
-                "created_at": user_story.current_chapter.created_at,
-                "updated_at": user_story.current_chapter.updated_at,
-                "choices": []  # 添加空的选择列表以匹配模型
-            }
-        
-        result.append(story_dict)
+    # 返回最简单的响应
+    simple_result = []
+    for us in user_stories:
+        simple_result.append({
+            "id": us.id,
+            "story_id": us.story_id,
+            "current_chapter_id": us.current_chapter_id,
+            "is_completed": us.is_completed
+        })
     
-    return ResponseModel(data=result)
+    return ResponseModel(data=simple_result)
 
 @router.get("/my/{story_id}", response_model=ResponseModel[UserStorySchema])
 def read_my_story(

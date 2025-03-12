@@ -15,9 +15,14 @@ from app.middleware.response_middleware import ResponseMiddleware
 import logging
 import traceback
 from fastapi import status
+import socket
+from app.utils.ip import get_client_ip
 
 # 配置日志
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # 创建数据库表（如果不存在）
@@ -55,6 +60,60 @@ app.include_router(user.router)
 app.include_router(task.router)
 app.include_router(story.router)
 app.include_router(task_plan.router)
+
+# 获取本机 IP 地址
+def get_local_ip():
+    try:
+        # 创建一个临时 socket 连接来获取本机 IP
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # 连接到一个外部服务器（不需要真正发送数据）
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception as e:
+        logger.error(f"获取本地 IP 地址时出错: {e}")
+        return "127.0.0.1"  # 默认返回 localhost
+
+# 在应用启动时显示 IP 地址
+@app.on_event("startup")
+async def startup_event():
+    local_ip = get_local_ip()
+    logger.info(f"服务器启动成功！")
+    logger.info(f"本地 IP 地址: {local_ip}")
+    logger.info(f"监听端口: 8000")
+    logger.info(f"绑定地址: 0.0.0.0")
+    logger.info(f"API 文档可通过以下地址访问:")
+    logger.info(f"Swagger UI: http://{local_ip}:8000/docs")
+    logger.info(f"ReDoc: http://{local_ip}:8000/redoc")
+    
+    # 尝试检测网络连接
+    try:
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind(("0.0.0.0", 8001))
+        s.close()
+        logger.info("端口 8000 可用并已成功绑定")
+    except Exception as e:
+        logger.error(f"端口绑定测试失败: {e}")
+
+# 修改会话中间件，记录客户端 IP
+@app.middleware("http")
+async def session_middleware(request: Request, call_next):
+    """会话管理中间件"""
+    # 获取客户端真实 IP
+    client_ip = get_client_ip(request)
+    
+    # 记录请求信息
+    logger.info(f"请求来自 IP: {client_ip} | 路径: {request.url.path} | 方法: {request.method}")
+    
+    # 处理请求
+    response = await call_next(request)
+    
+    # 记录响应状态
+    logger.info(f"响应状态: {response.status_code} | 客户端 IP: {client_ip}")
+    
+    return response
 
 # 全局异常处理器
 @app.exception_handler(HTTPException)
@@ -102,13 +161,6 @@ def read_root():
     """API根路径，返回欢迎信息"""
     return {"message": "Welcome to User Management and Task API"}
 
-@app.middleware("http")
-async def debug_middleware(request: Request, call_next):
-    print(f"Request path: {request.url.path}")
-    response = await call_next(request)
-    print(f"Response status: {response.status_code}")
-    return response
-
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True) 
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8001, reload=True) 
