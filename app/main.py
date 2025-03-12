@@ -17,6 +17,11 @@ import traceback
 from fastapi import status
 import socket
 from app.utils.ip import get_client_ip
+import os
+from dotenv import load_dotenv
+
+# 加载环境变量
+load_dotenv()
 
 # 配置日志
 logging.basicConfig(
@@ -24,6 +29,9 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# 从环境变量获取端口，默认为8001
+PORT = int(os.getenv("API_PORT", 8001))
 
 # 创建数据库表（如果不存在）
 user_model.Base.metadata.create_all(bind=engine)
@@ -81,21 +89,20 @@ async def startup_event():
     local_ip = get_local_ip()
     logger.info(f"服务器启动成功！")
     logger.info(f"本地 IP 地址: {local_ip}")
-    logger.info(f"监听端口: 8000")
-    logger.info(f"绑定地址: 0.0.0.0")
+    logger.info(f"监听端口: {PORT}")
     logger.info(f"API 文档可通过以下地址访问:")
-    logger.info(f"Swagger UI: http://{local_ip}:8000/docs")
-    logger.info(f"ReDoc: http://{local_ip}:8000/redoc")
+    logger.info(f"Swagger UI: http://{local_ip}:{PORT}/docs")
+    logger.info(f"ReDoc: http://{local_ip}:{PORT}/redoc")
     
-    # 尝试检测网络连接
-    try:
-        import socket
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind(("0.0.0.0", 8001))
-        s.close()
-        logger.info("端口 8000 可用并已成功绑定")
-    except Exception as e:
-        logger.error(f"端口绑定测试失败: {e}")
+    # # 尝试检测网络连接
+    # try:
+    #     import socket
+    #     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #     s.bind((local_ip, PORT))
+    #     s.close()
+    #     logger.info(f"端口 {PORT} 可用并已成功绑定")
+    # except Exception as e:
+    #     logger.error(f"端口绑定测试失败: {e}")
 
 # 修改会话中间件，记录客户端 IP
 @app.middleware("http")
@@ -163,4 +170,4 @@ def read_root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8001, reload=True) 
+    uvicorn.run("app.main:app",  port=PORT, reload=False) 

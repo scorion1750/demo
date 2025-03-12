@@ -140,90 +140,53 @@ def complete_task(
     unlocked_story = None
     if original_coins < 1000 and user.coins >= 1000:
         # 查找一个用户尚未解锁的故事
-        from app.models.story import Story, UserStory, StoryChapter
-        
-        # 获取用户已解锁的故事ID列表
-        unlocked_story_ids = [us.story_id for us in db.query(UserStory).filter(UserStory.user_id == current_user.id).all()]
-        
-        # 查找一个用户尚未解锁且激活的故事
-        story_to_unlock = db.query(Story).filter(
-            Story.id.notin_(unlocked_story_ids) if unlocked_story_ids else True,
+        from app.models.story import Story, UserStory
+        story = db.query(Story).filter(
+            ~Story.id.in_(
+                db.query(UserStory.story_id).filter(UserStory.user_id == current_user.id)
+            ),
             Story.is_active == True
         ).first()
         
-        if story_to_unlock:
-            # 获取故事的第一个章节
+        if story:
+            # 解锁故事
+            from app.models.story import StoryChapter
             first_chapter = db.query(StoryChapter).filter(
-                StoryChapter.story_id == story_to_unlock.id
+                StoryChapter.story_id == story.id
             ).order_by(StoryChapter.order_num).first()
             
-            # 创建用户故事记录
             user_story = UserStory(
                 user_id=current_user.id,
-                story_id=story_to_unlock.id,
+                story_id=story.id,
                 current_chapter_id=first_chapter.id if first_chapter else None
             )
-            
             db.add(user_story)
-            unlocked_story = story_to_unlock
+            unlocked_story = story
     
-    # 如果是重复任务，创建新的任务实例
-    if db_task.repeat_type != RepeatType.NONE:
-        new_task = TaskModel(
-            title=db_task.title,
-            description=db_task.description,
-            user_id=db_task.user_id,
-            repeat_type=db_task.repeat_type,
-            coins_reward=db_task.coins_reward,
-            task_plan_id=db_task.task_plan_id
-        )
-        
-        # 设置新任务的截止日期
-        if db_task.due_date:
-            if db_task.repeat_type == RepeatType.DAILY:
-                new_task.due_date = db_task.due_date + timedelta(days=1)
-            elif db_task.repeat_type == RepeatType.WEEKLY:
-                new_task.due_date = db_task.due_date + timedelta(days=7)
-            elif db_task.repeat_type == RepeatType.MONTHLY:
-                # 简单处理，加30天
-                new_task.due_date = db_task.due_date + timedelta(days=30)
-        
-        db.add(new_task)
-    
+    # 提交所有更改
     db.commit()
     db.refresh(db_task)
     
-    # 为了兼容现有的响应模型，直接返回任务对象
-    if not unlocked_story:
+    # 返回响应
+    if unlocked_story:
+        return ResponseModel(
+            data={
+                "task": db_task,
+                "unlocked_story": {
+                    "id": unlocked_story.id,
+                    "title": unlocked_story.title,
+                    "description": unlocked_story.description
+                },
+                "coins_earned": db_task.coins_reward,
+                "total_coins": user.coins
+            },
+            msg=f"任务完成！获得 {db_task.coins_reward} 金币，并解锁了故事《{unlocked_story.title}》"
+        )
+    else:
         return ResponseModel(
             data=db_task,
             msg=f"任务完成！获得 {db_task.coins_reward} 金币"
         )
-    
-    # 如果解锁了故事，返回字典格式的响应
-    return ResponseModel(
-        data={
-            "id": db_task.id,
-            "title": db_task.title,
-            "description": db_task.description,
-            "user_id": db_task.user_id,
-            "is_completed": db_task.is_completed,
-            "repeat_type": db_task.repeat_type,
-            "coins_reward": db_task.coins_reward,
-            "due_date": db_task.due_date,
-            "created_at": db_task.created_at,
-            "updated_at": db_task.updated_at,
-            "task_plan_id": db_task.task_plan_id,
-            "unlocked_story": {
-                "id": unlocked_story.id,
-                "title": unlocked_story.title,
-                "description": unlocked_story.description
-            },
-            "coins_earned": db_task.coins_reward,
-            "total_coins": user.coins
-        },
-        msg=f"任务完成！获得 {db_task.coins_reward} 金币，并解锁了故事《{unlocked_story.title}》"
-    )
 
 @router.post("/{task_id}/uncomplete", response_model=ResponseModel[TaskSchema])
 def uncomplete_task(
