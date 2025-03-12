@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from app.routers import user, task, story, task_plan
 from app.database import engine
 from app.models import user as user_model, task as task_model, task_completion as task_completion_model
@@ -13,6 +13,8 @@ from app.utils.exception_handlers import (
 )
 from app.middleware.response_middleware import ResponseMiddleware
 import logging
+import traceback
+from fastapi import status
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -77,6 +79,20 @@ async def general_exception_handler(request: Request, exc: Exception):
         content={
             "code": 500,
             "msg": "Internal Server Error",
+            "data": None
+        },
+    )
+
+@app.exception_handler(ResponseValidationError)
+async def response_validation_exception_handler(request: Request, exc: ResponseValidationError):
+    """处理响应验证错误，提供更详细的错误信息"""
+    logger.error(f"响应验证错误: {exc}")
+    logger.error(traceback.format_exc())
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "msg": f"服务器响应格式错误: {str(exc)}",
             "data": None
         },
     )

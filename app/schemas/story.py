@@ -134,9 +134,16 @@ class UserStoryInDB(UserStoryBase):
     last_interaction: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserStory(UserStoryInDB):
     responses: List[UserStoryResponse] = []
     story: Optional[Story] = None
-    current_chapter: Optional[StoryChapter] = None 
+    current_chapter: Optional[StoryChapter] = None
+
+    class Config:
+        from_attributes = True
+        # 允许额外字段
+        extra = "allow"
+        # 允许部分初始化
+        validate_assignment = False 

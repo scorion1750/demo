@@ -15,7 +15,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "300"))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -27,6 +27,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def get_user(db: Session, username: str):
+    print(f"Getting user with username: {username}")
     return db.query(User).filter(User.username == username).first()
 
 def authenticate_user(db: Session, username: str, password: str):

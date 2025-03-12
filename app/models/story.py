@@ -42,7 +42,7 @@ class StoryChapter(Base):
     # 关系
     story = relationship("Story", back_populates="chapters")
     choices = relationship("StoryChoice", back_populates="chapter", foreign_keys="StoryChoice.chapter_id", cascade="all, delete-orphan")
-    next_for_choices = relationship("StoryChoice", foreign_keys="StoryChoice.next_chapter_id")
+    next_for_choices = relationship("StoryChoice", foreign_keys="StoryChoice.next_chapter_id", overlaps="next_chapter")
 
 class StoryChoice(Base):
     __tablename__ = "story_choices"
@@ -55,7 +55,7 @@ class StoryChoice(Base):
     
     # 关系
     chapter = relationship("StoryChapter", back_populates="choices", foreign_keys=[chapter_id])
-    next_chapter = relationship("StoryChapter", foreign_keys=[next_chapter_id])
+    next_chapter = relationship("StoryChapter", foreign_keys=[next_chapter_id], overlaps="next_for_choices")
 
 class UserStory(Base):
     __tablename__ = "user_stories"

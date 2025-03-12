@@ -25,7 +25,7 @@ class ErrorResponseModel(BaseModel):
     """错误响应模型"""
     code: int
     msg: str
-    data: None = None
+    data: Optional[Any] = None
 
     class Config:
         json_schema_extra = {
